@@ -51,9 +51,9 @@ tunsafe_install(){
     port=$(rand 10000 60000)
     eth=$(ls /sys/class/net | awk '/^e/{print}')
     obfsstr=$(cat /dev/urandom | head -1 | md5sum | head -c 4)
-    green "输入 1 开启默认UDP+混淆模式（推荐使用）"
-    green "输入 2 开启默认TCP+混淆模式"
-    green "输入 3 开启默认TCP+混淆+HTTPS伪装模式"
+    green "Enter  1 for UDP+obfs (recommended)"
+    green "Enter 2 for TCP+obfs"
+    green "Enter 3 for TCP+obfs+HTTPS masquerade mode"
     read choose
 if [ $choose == 1 ]
 then
@@ -66,7 +66,7 @@ ObfuscateKey = $obfsstr
 PostUp   = iptables -A FORWARD -i tun0 -j ACCEPT; iptables -A FORWARD -o tun0 -j ACCEPT; iptables -t nat -A POSTROUTING -o $eth -j MASQUERADE
 PostDown = iptables -D FORWARD -i tun0 -j ACCEPT; iptables -D FORWARD -o tun0 -j ACCEPT; iptables -t nat -D POSTROUTING -o $eth -j MASQUERADE
 ListenPort = $port
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -80,7 +80,7 @@ sudo cat > /etc/tunsafe/client.conf <<-EOF
 PrivateKey = $c1
 Address = 10.0.0.2/24 
 ObfuscateKey = $obfsstr
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -101,7 +101,7 @@ ObfuscateKey = $obfsstr
 ListenPortTCP = $port
 PostUp   = iptables -A FORWARD -i tun0 -j ACCEPT; iptables -A FORWARD -o tun0 -j ACCEPT; iptables -t nat -A POSTROUTING -o $eth -j MASQUERADE
 PostDown = iptables -D FORWARD -i tun0 -j ACCEPT; iptables -D FORWARD -o tun0 -j ACCEPT; iptables -t nat -D POSTROUTING -o $eth -j MASQUERADE
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -115,7 +115,7 @@ sudo cat > /etc/tunsafe/client.conf <<-EOF
 PrivateKey = $c1
 Address = 10.0.0.2/24 
 ObfuscateKey = $obfsstr
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -138,7 +138,7 @@ ObfuscateTCP=tls-chrome
 PostUp   = iptables -A FORWARD -i tun0 -j ACCEPT; iptables -A FORWARD -o tun0 -j ACCEPT; iptables -t nat -A POSTROUTING -o $eth -j MASQUERADE
 PostDown = iptables -D FORWARD -i tun0 -j ACCEPT; iptables -D FORWARD -o tun0 -j ACCEPT; iptables -t nat -D POSTROUTING -o $eth -j MASQUERADE
 ListenPort = $port
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -153,7 +153,7 @@ PrivateKey = $c1
 Address = 10.0.0.2/24 
 ObfuscateKey = $obfsstr
 ObfuscateTCP=tls-chrome
-DNS = 8.8.8.8
+DNS = 1.1.1.1
 MTU = 1380
 
 [Peer]
@@ -188,13 +188,13 @@ EOF
     sudo tunsafe start -d TunSafe.conf
     
     content=$(cat /etc/tunsafe/client.conf)
-    green "电脑端请下载/etc/tunsafe/client.conf，手机端可直接使用软件扫码"
+    green "Download client config /etc/tunsafe/client.conf and you can add config by scanning generated QR code"
     echo "${content}" | qrencode -o - -t UTF8
 }
 
 add_user(){
-    green "给新用户起个名字，不能和已有用户重复"
-    read -p "请输入用户名：" newname
+    green "Create client username, username must be unique to every new client"
+    read -p "Please enter new client name：" newname
     cd /etc/tunsafe/
     cp client.conf $newname.conf
     tunsafe genkey | tee temprikey | tunsafe pubkey > tempubkey
@@ -209,7 +209,7 @@ PublicKey = $(cat tempubkey)
 AllowedIPs = 10.0.0.$newnum/32
 EOF
     tunsafe set tun0 peer $(cat tempubkey) allowed-ips 10.0.0.$newnum/32
-    green "添加完成，文件：/etc/tunsafe/$newname.conf"
+    green "New client added and can be downloaded at：/etc/tunsafe/$newname.conf"
     rm -f temprikey tempubkey
 }
 
@@ -224,19 +224,19 @@ start_menu(){
     green " Youtube：atrandys                   "
     green " ===================================="
     echo
-    green " 1. 安装TunSafe"
-    green " 2. 查看客户端二维码"
-    green " 3. 增加用户"
-    yellow " 0. 退出脚本"
+    green " 1. Install TunSafe"
+    green " 2. Generate client QR code"
+    green " 3. Add new client"
+    yellow " 0. Exit"
     echo
-    read -p "请输入数字:" num
+    read -p "Select the option:" num
     case "$num" in
     1)
     tunsafe_install
     ;;
     2)
     content=$(cat /etc/tunsafe/client.conf)
-    green "这里只显示默认增加的第一个client的二维码"
+    green "QR code of 1st client can be shown here"
     echo "${content}" | qrencode -o - -t UTF8
     ;;
     3)
@@ -247,7 +247,7 @@ start_menu(){
     ;;
     *)
     clear
-    red "请输入正确数字"
+    red "Please choose correct option"
     sleep 2s
     start_menu
     ;;
