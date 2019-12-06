@@ -209,8 +209,9 @@ PublicKey = $(cat tempubkey)
 AllowedIPs = 10.0.0.$newnum/32
 EOF
     tunsafe set tun0 peer $(cat tempubkey) allowed-ips 10.0.0.$newnum/32
+    cd /etc/tunsafe/
     tunsafe stop tun0
-    tunsafe start -d /etc/tunsafe/TunSafe.conf
+    tunsafe start -d TunSafe.conf
     green "New client added and can be downloaded at：/etc/tunsafe/$newname.conf"
     rm -f temprikey tempubkey
 }
