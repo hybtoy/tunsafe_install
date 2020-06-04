@@ -30,8 +30,8 @@ tunsafe_install(){
     version=$(cat /etc/os-release | awk -F '[".]' '$1=="VERSION="{print $2}')  
     apt-get update -y
     sudo apt-get install -y git curl make
-    git clone https://github.com/TunSafe/TunSafe.git
-    cd TunSafe
+    git clone https://github.com/hybtoy/tunsafe.git
+    cd tunsafe
     sudo apt-get install -y clang-6.0 
     sudo make && sudo make install
     
